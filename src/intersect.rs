@@ -1,5 +1,6 @@
 use glam::Vec2;
 
+/// Detect intersections (or the lack of it) of two line segments
 pub fn intersect_point(lseg1: (Vec2, Vec2), lseg2: (Vec2, Vec2)) -> Option<Vec2> {
     let (oa1, oa2) = (lseg1.0, lseg1.1);
     let (ob1, ob2) = (lseg2.0, lseg2.1);
