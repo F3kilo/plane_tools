@@ -106,18 +106,23 @@ mod tests {
         (verts, conns)
     }
 
+    fn test_graph() -> Graph<Vec2> {
+        let (verts, conns) = test_data();
+        Graph::from_data(verts.into_iter(), conns.clone().into_iter())
+    }
+
     #[test]
     fn from_data() {
-        let (verts, conns) = test_data();
-        let g = Graph::from_data(verts.iter(), conns.clone().into_iter());
+        let verts = test_data().0;
+        let g = test_graph();
 
         assert_eq!(verts.len(), g.len());
 
-        assert_eq!(verts[0], *g[0]);
-        assert_eq!(verts[1], *g[1]);
-        assert_eq!(verts[2], *g[2]);
-        assert_eq!(verts[3], *g[3]);
-        assert_eq!(verts[4], *g[4]);
+        assert_eq!(verts[0], g[0]);
+        assert_eq!(verts[1], g[1]);
+        assert_eq!(verts[2], g[2]);
+        assert_eq!(verts[3], g[3]);
+        assert_eq!(verts[4], g[4]);
 
         assert!(g.is_connected(0, 1));
         assert!(g.is_connected(0, 4));
@@ -128,5 +133,23 @@ mod tests {
         assert!(g.is_connected(3, 2));
         assert!(g.is_connected(3, 4));
         assert!(g.is_connected(4, 0));
+    }
+
+    #[test]
+    fn add_vertex() {
+        let mut g = test_graph();
+        let new_vertex = Vec2::new(2f32, 3f32);
+        let new_index = g.add_vertex(new_vertex);
+        assert_eq!(g[new_index], new_vertex);
+        assert!(g.connects_of(new_index).is_empty());
+    }
+
+    #[test]
+    fn add_edge() {
+        let mut g = test_graph();
+        let new_edge = (1, 3);
+        g.add_edge(new_edge.0, new_edge.1);
+        assert!(g.is_connected(new_edge.0, new_edge.1));
+        assert!(g.is_connected(new_edge.1, new_edge.0));
     }
 }
