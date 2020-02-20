@@ -1,39 +1,52 @@
 use std::collections::HashSet;
 use std::ops::Index;
 
-const DEFAULT_CONNECTIONS_PER_POINT: usize = 4;
+/// Determine default capacity of connections set for every vertex.
+pub const DEFAULT_CONNECTIONS_PER_VERTEX: usize = 4;
 
+/// Data structure that represent generic *vertices* and undirected connections
+/// between them - *edges*.
 #[derive(Clone, Debug, Default)]
 pub struct Graph<T> {
     verts: Vec<T>,
     connects: Vec<HashSet<usize>>,
-    edge_per_point_capacity: usize,
+    edge_per_vertex_capacity: usize,
 }
 
 impl<T> Graph<T> {
+    /// Creates new empty graph.
     pub fn new() -> Self {
         Self {
             verts: Vec::new(),
             connects: Vec::new(),
-            edge_per_point_capacity: DEFAULT_CONNECTIONS_PER_POINT,
+            edge_per_vertex_capacity: DEFAULT_CONNECTIONS_PER_VERTEX,
         }
     }
 
-    pub fn with_capacity(points_capacity: usize, edge_per_point_capacity: usize) -> Self {
+    /// Creates empty graph with preallocated memory for vertices and edges.
+    /// # Arguments:
+    /// `vertices_capacity` - capacity for collection of vertices.  
+    /// `edge_per_vertex_capacity` - capacity of connections collections for each vertex.
+    /// Default value `const DEFAULT_CONNECTIONS_PER_VERTEX: usize = 4`
+    pub fn with_capacity(vertices_capacity: usize, edge_per_vertex_capacity: usize) -> Self {
         Self {
-            verts: Vec::with_capacity(points_capacity),
-            connects: Vec::with_capacity(points_capacity),
-            edge_per_point_capacity,
+            verts: Vec::with_capacity(vertices_capacity),
+            connects: Vec::with_capacity(vertices_capacity),
+            edge_per_vertex_capacity,
         }
     }
 
+    /// Creates graph filled by `vertices` with `edges`.
+    /// # Arguments:
+    /// `vertices` - iterator of vertices.  
+    /// `edges` - iterator of pairs of vertices indices, which must be connected.
     pub fn from_data(
         vertices: impl Iterator<Item = T>,
         edges: impl Iterator<Item = (usize, usize)>,
     ) -> Self {
         let verts: Vec<T> = vertices.collect();
         let len = verts.len();
-        let mut temp = Self::with_capacity(len, DEFAULT_CONNECTIONS_PER_POINT);
+        let mut temp = Self::with_capacity(len, DEFAULT_CONNECTIONS_PER_VERTEX);
         for v in verts {
             temp.add_vertex(v);
         }
@@ -45,36 +58,63 @@ impl<T> Graph<T> {
         temp
     }
 
+    /// Adds vertex to graph.
+    /// # Arguments:
+    /// `vertex` - vertex, that must be added.
+    /// # Returns:
+    /// Index of added vertex to access to it.
     pub fn add_vertex(&mut self, vertex: T) -> usize {
         let new_index = self.verts.len();
         self.verts.push(vertex);
         self.connects
-            .push(HashSet::with_capacity(self.edge_per_point_capacity));
+            .push(HashSet::with_capacity(self.edge_per_vertex_capacity));
         new_index
     }
 
+    /// Adds edge to graph.
+    /// # Arguments:
+    /// `v1` - index ofvertex, that must be connected with `v2`.  
+    /// `v2` - index ofvertex, that must be connected with `v1`.
     pub fn add_edge(&mut self, v1: usize, v2: usize) {
         self.connects[v1].insert(v2);
         self.connects[v2].insert(v1);
     }
 
+    /// Removes edge from graph.
+    /// If edge is not present, that function does nothing.
+    /// # Arguments:
+    /// `v1` - index of vertex, that must be disconnected with `v2`.  
+    /// `v2` - index of vertex, that must be disconnected with `v1`.
     pub fn remove_edge(&mut self, v1: usize, v2: usize) {
         self.connects[v1].remove(&v2);
         self.connects[v2].remove(&v1);
     }
 
+    /// Checks if edge, that connects specified vertices, is present.
+    /// Connections are unordered, thats why  always
+    /// `is_connected(v1, v2) == is_connected(v2, v1)`
+    /// # Arguments:
+    /// `v1` - index of first vertex to check.  
+    /// `v2` - index of second vertex to check.
     pub fn is_connected(&self, v1: usize, v2: usize) -> bool {
         self.connects[v1].contains(&v2)
     }
 
+    /// Connects of vertices with specified index.
+    /// # Arguments:
+    /// `v` - index of vertex of interest;
+    /// # Returns:
+    /// Set of indices, that connected to `v`.
     pub fn connects_of(&self, v: usize) -> &HashSet<usize> {
         &self.connects[v]
     }
 
+    /// Vector of all current vertices.
     pub fn vertices(&self) -> &Vec<T> {
         &self.verts
     }
 
+    /// Current count of vertices.
     pub fn len(&self) -> usize {
         self.verts.len()
     }
