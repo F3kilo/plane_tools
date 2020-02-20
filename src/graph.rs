@@ -33,11 +33,10 @@ impl<T> Graph<T> {
     ) -> Self {
         let verts: Vec<T> = vertices.collect();
         let len = verts.len();
-        let mut temp = Self {
-            verts,
-            connects: Vec::with_capacity(len),
-            edge_per_point_capacity: DEFAULT_CONNECTIONS_PER_POINT,
-        };
+        let mut temp = Self::with_capacity(len, DEFAULT_CONNECTIONS_PER_POINT);
+        for v in verts {
+            temp.add_vertex(v);
+        }
 
         for (v1, v2) in edges {
             temp.add_edge(v1, v2);
@@ -75,6 +74,10 @@ impl<T> Graph<T> {
     pub fn vertices(&self) -> &Vec<T> {
         &self.verts
     }
+
+    pub fn len(&self) -> usize {
+        self.verts.len()
+    }
 }
 
 impl<T> Index<usize> for Graph<T> {
@@ -82,5 +85,48 @@ impl<T> Index<usize> for Graph<T> {
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.verts[index]
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use glam::Vec2;
+
+    fn test_data() -> (Vec<Vec2>, Vec<(usize, usize)>) {
+        let verts = vec![
+            Vec2::new(0f32, 0f32),
+            Vec2::new(1f32, 1f32),
+            Vec2::new(2f32, 2f32),
+            Vec2::new(3f32, 1f32),
+            Vec2::new(4f32, 0f32),
+        ];
+
+        let conns = vec![(0, 1), (1, 2), (2, 3), (3, 4), (4, 0)];
+        (verts, conns)
+    }
+
+    #[test]
+    fn from_data() {
+        let (verts, conns) = test_data();
+        let g = Graph::from_data(verts.iter(), conns.clone().into_iter());
+
+        assert_eq!(verts.len(), g.len());
+
+        assert_eq!(verts[0], *g[0]);
+        assert_eq!(verts[1], *g[1]);
+        assert_eq!(verts[2], *g[2]);
+        assert_eq!(verts[3], *g[3]);
+        assert_eq!(verts[4], *g[4]);
+
+        assert!(g.is_connected(0, 1));
+        assert!(g.is_connected(0, 4));
+        assert!(g.is_connected(1, 0));
+        assert!(g.is_connected(1, 2));
+        assert!(g.is_connected(2, 1));
+        assert!(g.is_connected(2, 3));
+        assert!(g.is_connected(3, 2));
+        assert!(g.is_connected(3, 4));
+        assert!(g.is_connected(4, 0));
     }
 }
