@@ -29,23 +29,21 @@ impl<T> Graph<T> {
 
     pub fn from_data(
         vertices: impl Iterator<Item = T>,
-        connects: impl Iterator<Item = impl Iterator<Item = usize>>,
+        edges: impl Iterator<Item = (usize, usize)>,
     ) -> Self {
         let verts: Vec<T> = vertices.collect();
-        let mut local_connects: Vec<HashSet<usize>> = Vec::with_capacity(verts.len());
-        let mut max_connections = DEFAULT_CONNECTIONS_PER_POINT;
-        for vert_connects in connects {
-            let vert_connects: HashSet<usize> = vert_connects.collect();
-            if max_connections < vert_connects.len() {
-                max_connections = verts.len();
-            }
-            local_connects.push(vert_connects);
-        }
-        Self {
+        let len = verts.len();
+        let mut temp = Self {
             verts,
-            connects: local_connects,
-            edge_per_point_capacity: max_connections,
+            connects: Vec::with_capacity(len),
+            edge_per_point_capacity: DEFAULT_CONNECTIONS_PER_POINT,
+        };
+
+        for (v1, v2) in edges {
+            temp.add_edge(v1, v2);
         }
+
+        temp
     }
 
     pub fn add_vertex(&mut self, vertex: T) -> usize {
