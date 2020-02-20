@@ -152,4 +152,13 @@ mod tests {
         assert!(g.is_connected(new_edge.0, new_edge.1));
         assert!(g.is_connected(new_edge.1, new_edge.0));
     }
+
+    #[test]
+    fn remove_edge() {
+        let mut g = test_graph();
+        let removed_edge = (0, 1);
+        g.remove_edge(removed_edge.0, removed_edge.1);
+        assert!(!g.is_connected(removed_edge.0, removed_edge.1));
+        assert!(!g.is_connected(removed_edge.1, removed_edge.0));
+    }
 }
