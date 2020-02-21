@@ -118,6 +118,11 @@ impl<T> Graph<T> {
     pub fn len(&self) -> usize {
         self.verts.len()
     }
+    
+    /// True, if graph does not contain vertices.
+    pub fn is_empty(&self) -> bool {
+        self.verts.is_empty()
+    }
 }
 
 impl<T> Index<usize> for Graph<T> {
