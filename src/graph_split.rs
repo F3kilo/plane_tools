@@ -1,6 +1,7 @@
 use crate::graph::Graph;
 use crate::height_ord_vec2::HeightOrdVec2;
 use crate::intersect::intersect_point;
+use crate::vec2cmp;
 use glam::Vec2;
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashSet};
@@ -31,15 +32,8 @@ fn highest_intersection_point(
     let mut top_intersection_point = None;
     for q in s {
         for (v1, v2) in edges {
-            if let Some(i) = intersect_point((g[p], g[*q]), (g[*v1], g[*v2])) {
-                if top_intersection_point.is_none() {
-                    top_intersection_point = Some(IntersectionPoint {
-                        q: *q,
-                        edge: (*v1, *v2),
-                        i,
-                    })
-                }
-            }
+            let i = intersect_point((g[p], g[*q]), (g[*v1], g[*v2]));
+            try_make_higher(&mut top_intersection_point, i, *q, (*v1, *v2));
         }
     }
     top_intersection_point
@@ -53,9 +47,11 @@ fn try_make_higher(
 ) {
     if let Some(pos) = pos {
         if let Some(ip) = i {
-            
+            if vec2cmp::cmp_y(ip.i, pos) == Ordering::Greater {
+                *i = Some(IntersectionPoint { q, edge, i: pos });
+            }
         } else {
-            *i = Some(IntersectionPoint { q, edge, i: pos })
+            *i = Some(IntersectionPoint { q, edge, i: pos });
         }
     }
 }
