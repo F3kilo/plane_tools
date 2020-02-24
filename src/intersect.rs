@@ -13,12 +13,14 @@ pub fn intersect_point(lseg1: (Vec2, Vec2), lseg2: (Vec2, Vec2)) -> Option<Vec2>
     let den = b.x() * a.y() - a.x() * b.y();
 
     let alpha = num / den;
-    if alpha <= 0f32 || alpha > 1f32 {
+    println!("alpha: {}", alpha);
+    if alpha < 0f32 || alpha > 1f32 {
         return None;
     }
 
     let gamma = (c.x() + alpha * a.x()) / b.x();
-    if gamma <= 0f32 || gamma > 1f32 {
+    println!("gamma: {}", alpha);
+    if gamma < 0f32 || gamma > 1f32 {
         return None;
     }
 
