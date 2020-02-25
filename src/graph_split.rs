@@ -200,11 +200,11 @@ mod tests {
         assert_eq!(h.pop().unwrap().0, 4);
     }
 
-    #[test]
-    fn into_no_intersect_test() {
-        let g_data = square_graph_data();
-        let g = Graph::from_data(g_data.0.clone().into_iter(), g_data.1.clone().into_iter());
-        let result = into_no_intersect(g);
-        println!("Result Graph: {:#?}", result);
-    }
+    // #[test]
+    // fn into_no_intersect_test() {
+    //     let g_data = square_graph_data();
+    //     let g = Graph::from_data(g_data.0.clone().into_iter(), g_data.1.clone().into_iter());
+    //     let result = into_no_intersect(g);
+    //     println!("Result Graph: {:#?}", result);
+    // }
 }
