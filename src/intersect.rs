@@ -123,7 +123,7 @@ mod tests {
         TestData {
             l1: (a1, a2),
             l2: (b1, b2),
-            res: None,
+            res: Some(b1),
         }
     }
 
@@ -147,7 +147,7 @@ mod tests {
         TestData {
             l1: (a1, a2),
             l2: (b1, b2),
-            res: None,
+            res: Some(a1),
         }
     }
 
