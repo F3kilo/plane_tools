@@ -7,6 +7,74 @@ use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashSet};
 use std::iter::FromIterator;
 
+pub struct NoIntersectGraph {
+    graph: Graph<Vec2>,
+    heap: BinaryHeap<HeightOrdGraphVert>,
+    edges: HashSet<(usize, usize)>,
+}
+
+impl NoIntersectGraph {
+    pub fn new(original_graph: Graph<Vec2>) -> Self {
+        Self {
+            heap: BinaryHeap::from_iter(
+                verts
+                    .iter()
+                    .enumerate()
+                    .map(|(i, v)| HeightOrdGraphVert::new(i, *v)),
+            ),
+            edges: HashSet::with_capacity(original_graph.len() * 2),
+            graph: original_graph,
+        }
+    }
+
+    pub fn split(mut self) -> Graph<Vec2> {
+        while let Some(current_vertex) = self.heap.pop() {
+            let current_vertex = current_vertex.0;
+            let lc = self.lower_connections(current_vertex);
+            let mb_highest_ip = self.highest_intersection_point(current_vertex, &lower_connections);
+            if let Some(highest_ip) = mb_highest_ip {
+                split_by_intersection(&mut g, p, &t_max, &mut s, &mut edges, &mut heap);
+            }
+        }
+
+        self.graph
+    }
+
+    fn lower_connections(mut self, current_vertex: usize) -> HashSet<usize> {
+        self.graph.connects_of(current_vertex).iter()
+            .filter(|lc| !self.edges.remove(*(lc, current_vertex))).collect()
+    }
+
+    fn highest_intersection_point(self, current_vertex: usize, lower_connections: &HashSet<usize>) -> Option<IntersectionPoint> {
+        let mut top_intersection_point = None;
+        for lc in lower_connections {
+            for (v1, v2) in self.edges {
+                let mut i = None;
+                let current_line_segment = (self.graph[current_vertex], self.graph[*lc]);
+                let edge_line_segment = (self.graph[v1], self.graph[v2]);
+                if *lc != v2 {
+                    intersect_position = intersect_point(current_line_segment, edge_line_segment);
+                }
+                try_make_higher(&mut top_intersection_point,
+                                intersect_position,
+                                *lc,
+                                (*v1, *v2),
+                );
+            }
+        }
+        top_intersection_point
+    }
+
+    fn split_by_intersection(
+        current_point_index: usize,
+        intersection_point: &IntersectionPoint,
+        
+    ) {
+
+    }
+}
+
+
 pub fn into_no_intersect(mut g: Graph<Vec2>) -> Graph<Vec2> {
     let mut heap = vertices_to_heap(g.vertices());
     let mut edges: HashSet<(usize, usize)> = HashSet::new();
@@ -35,7 +103,7 @@ fn split_by_intersection(
     edges.remove(&t.edge);
     edges.remove(&(p, t.q));
     s.remove(&t.q);
-    let i = g.add_vertex(t.i);
+    let i = g.add_vertex(t.position);
     g.remove_edge(p, t.q);
     g.remove_edge(t.edge.0, t.edge.1);
     g.add_edge(p, i);
@@ -44,14 +112,14 @@ fn split_by_intersection(
     g.add_edge(i, t.edge.1);
     edges.insert((p, i));
     edges.insert((t.edge.0, i));
-    h.push(HeightOrdGraphVert(i, t.i.into()));
+    h.push(HeightOrdGraphVert(i, t.position.into()));
 }
 
 #[derive(Debug)]
 struct IntersectionPoint {
     q: usize,
     edge: (usize, usize),
-    i: Vec2,
+    position: Vec2,
 }
 
 fn highest_intersection_point(
@@ -82,18 +150,18 @@ fn highest_intersection_point(
 }
 
 fn try_make_higher(
-    i: &mut Option<IntersectionPoint>,
-    pos: Option<Vec2>,
-    q: usize,
+    current_intersection_point: &mut Option<IntersectionPoint>,
+    new_intersection_point_pos: Option<Vec2>,
+    second_point_index: usize,
     edge: (usize, usize),
 ) {
-    if let Some(pos) = pos {
-        if let Some(ip) = i {
-            if vec2cmp::cmp_y(ip.i, pos) == Ordering::Greater {
-                *i = Some(IntersectionPoint { q, edge, i: pos });
+    if let Some(pos) = new_intersection_point_pos {
+        if let Some(ip) = current_intersection_point {
+            if vec2cmp::cmp_y(ip.position, pos) == Ordering::Greater {
+                *current_intersection_point = Some(IntersectionPoint { q: second_point_index, edge, position: pos });
             }
         } else {
-            *i = Some(IntersectionPoint { q, edge, i: pos });
+            *current_intersection_point = Some(IntersectionPoint { q: second_point_index, edge, position: pos });
         }
     }
 }
