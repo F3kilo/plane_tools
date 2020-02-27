@@ -26,7 +26,7 @@ impl PartialOrd for ExtendedVec2 {
 
 impl Ord for ExtendedVec2 {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.partial_cmp(other).expect("can't compare some components are NaN")
+        self.partial_cmp(other).expect("can't compare, some components are NaN")
     }
 }
 
