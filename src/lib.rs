@@ -1,3 +1,4 @@
+pub mod extended_vec2;
 pub mod vec2cmp;
 pub mod order;
 pub mod intersect;
