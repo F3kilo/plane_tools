@@ -66,6 +66,8 @@ impl<T: Hash + Eq + Clone> Graph<T> {
     /// Adds vertex to graph.
     /// # Arguments:
     /// `vertex` - vertex, that must be added.
+    /// # Returns:
+    /// `true` if vertex is new and was really added
     pub fn add_vertex(&mut self, v: T) -> bool {
         if self.verts.contains_key(&v) {
             return false;
@@ -84,6 +86,9 @@ impl<T: Hash + Eq + Clone> Graph<T> {
     /// `false` if edge was presented already;
     pub fn add_edge(&mut self, v1: &T, v2: &T) -> bool {
         if self.verts.contains_key(v1) && self.verts.contains_key(v2) {
+            if v1 == v2 {
+                return false
+            }
             self.verts.get_mut(v1).unwrap().insert(v2.clone());
             self.verts.get_mut(v2).unwrap().insert(v1.clone());
             return true;
@@ -116,6 +121,9 @@ impl<T: Hash + Eq + Clone> Graph<T> {
     /// `v2` - second vertex to check.
     pub fn is_connected(&self, v1: &T, v2: &T) -> bool {
         if let Some(v) = self.verts.get(v1) {
+            if v1 == v2 {
+                return true;
+            }
             return v.contains(v2);
         }
         false

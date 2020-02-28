@@ -1,6 +1,7 @@
 use glam::Vec2;
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
+use std::fmt;
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct ExtVec2(pub Vec2);
@@ -8,6 +9,12 @@ pub struct ExtVec2(pub Vec2);
 impl From<Vec2> for ExtVec2 {
     fn from(v: Vec2) -> Self {
         Self(v)
+    }
+}
+
+impl fmt::Display for ExtVec2 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({}, {})", self.0.x(), self.0.y())
     }
 }
 
@@ -23,7 +30,7 @@ impl PartialOrd for ExtVec2 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         let y_ord = self.0.y().partial_cmp(&other.0.y());
         if y_ord == Some(Ordering::Equal) {
-            let x_ord = self.0.x().partial_cmp(&other.0.x());
+            let x_ord = other.0.x().partial_cmp(&self.0.x());
             return x_ord;
         }
         y_ord
