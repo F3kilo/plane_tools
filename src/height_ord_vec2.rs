@@ -1,6 +1,6 @@
+use crate::vec2cmp;
 use glam::Vec2;
 use std::cmp::Ordering;
-use crate::vec2cmp;
 
 pub struct HeightOrdVec2(pub Vec2);
 
