@@ -130,7 +130,7 @@ impl<T: Hash + Eq + Clone> Graph<T> {
         self.verts.get(v)
     }
 
-    /// Vector of all current vertices.
+    /// Iterator of all current vertices.
     pub fn vertices(&self) -> impl Iterator<Item=&T> {
         self.verts.keys()
     }
@@ -219,7 +219,7 @@ mod tests {
         let mut g = test_graph();
         let v1 = Vec2::new(1f32, 1f32).into();
         let v3 = Vec2::new(3f32, 1f32).into();
-        g.add_edge(&v1,&v3);
+        g.add_edge(&v1, &v3);
         assert!(g.is_connected(&v1, &v3));
         assert!(g.is_connected(&v3, &v1));
     }
