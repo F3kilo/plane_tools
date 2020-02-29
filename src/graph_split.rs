@@ -45,6 +45,8 @@ fn unchecked_connected(
         if edges.remove(&(q, p)) {
             s.remove(&q);
         }
+
+        edges.remove(&(p, q));
     }
     s
 }
@@ -114,18 +116,11 @@ fn split_by_ip(
     graph.add_edge(&ip.pos, &ip.q);
     graph.add_edge(&ip.edge.0, &ip.pos);
     graph.add_edge(&ip.pos, &ip.edge.1);
-    if ip.pos > p {
-        if p != ip.pos {
-            edges.insert((p, ip.pos));
-        }
-        if ip.edge.0 != ip.pos {
-            edges.insert((ip.edge.0, ip.pos));
-        }
-    }
 
-    if is_new {
-        h.push(ip.pos);
-    }
+    edges.insert((p, ip.pos));
+    edges.insert((ip.edge.0, ip.pos));
+
+    h.push(ip.pos);
 }
 
 #[cfg(test)]
@@ -133,8 +128,8 @@ mod tests {
     use super::*;
     use glam::Vec2;
 
-    fn square_graph_data() -> (Vec<ExtVec2>, Vec<(ExtVec2, ExtVec2)>) {
-        let verts = vec![
+    fn square_graph_data() -> (Vec<ExtVec2>, Vec<(ExtVec2, ExtVec2)>, Graph<ExtVec2>) {
+        let verts : Vec<ExtVec2> = vec![
             Vec2::new(0f32, 0f32).into(),
             Vec2::new(0f32, 1f32).into(),
             Vec2::new(1f32, 1f32).into(),
@@ -155,13 +150,42 @@ mod tests {
             (verts[6], verts[7]),
             (verts[7], verts[4]),
         ];
-        (verts, edges)
+
+        let mut expected_result = Graph::with_capacity(verts.len(), 4);
+        for vert in &verts {
+            expected_result.add_vertex(vert.clone());
+        }
+
+        expected_result.add_edge(&verts[0], &verts[1]);
+        expected_result.add_edge(&verts[0], &verts[4]);
+        expected_result.add_edge(&verts[1], &verts[0]);
+        expected_result.add_edge(&verts[1], &verts[5]);
+        expected_result.add_edge(&verts[2], &verts[5]);
+        expected_result.add_edge(&verts[2], &verts[6]);
+        expected_result.add_edge(&verts[2], &verts[3]);
+        expected_result.add_edge(&verts[3], &verts[4]);
+        expected_result.add_edge(&verts[3], &verts[2]);
+        expected_result.add_edge(&verts[3], &verts[7]);
+        expected_result.add_edge(&verts[4], &verts[0]);
+        expected_result.add_edge(&verts[4], &verts[5]);
+        expected_result.add_edge(&verts[4], &verts[3]);
+        expected_result.add_edge(&verts[5], &verts[1]);
+        expected_result.add_edge(&verts[5], &verts[2]);
+        expected_result.add_edge(&verts[5], &verts[4]);
+        expected_result.add_edge(&verts[6], &verts[2]);
+        expected_result.add_edge(&verts[6], &verts[7]);
+        expected_result.add_edge(&verts[7], &verts[3]);
+        expected_result.add_edge(&verts[7], &verts[6]);
+
+        (verts, edges, expected_result)
     }
+
+
 
     #[test]
     fn into_no_intersect_test() {
-        let g_data = square_graph_data();
-        let g = Graph::from_data(g_data.0.clone().into_iter(), g_data.1.into_iter());
+        let (verts, edges, expected_result) = square_graph_data();
+        let g = Graph::from_data(verts.clone().into_iter(), edges.into_iter());
         let result = into_no_intersect(g);
         for v in result.vertices() {
             println!("Vertex: {}", v);
@@ -170,5 +194,7 @@ mod tests {
                 println!("\tConnected with: {}", c);
             }
         }
+
+        assert_eq!(expected_result, result)
     }
 }
