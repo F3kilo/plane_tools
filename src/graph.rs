@@ -154,6 +154,14 @@ impl<T: Hash + Eq + Clone> Graph<T> {
     }
 }
 
+impl<T: Eq + Hash> PartialEq<Graph<T>> for Graph<T> {
+    fn eq(&self, other: &Graph<T>) -> bool {
+        self.verts == other.verts
+    }
+}
+
+impl<T: Eq + Hash> Eq for Graph<T> {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
