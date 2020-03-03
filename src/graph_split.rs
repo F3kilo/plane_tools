@@ -15,22 +15,15 @@ pub fn into_no_intersect(mut graph: Graph<ExtVec2>) -> Graph<ExtVec2> {
     let mut heap = BinaryHeap::from_iter(graph.vertices().cloned());
     let mut edges = HashSet::with_capacity(graph.len());
     while let Some(p) = heap.pop() {
-        println!("Start process: {}", p);
         print_edges(&edges);
         let mut s = unchecked_connected(&graph, p, &mut edges);
-        println!("\tUnchecked connected: {:?}", s);
         let mb_t_max = highest_ip(p, &s, &edges);
-        println!("\tMay be top intersection: {:?}", mb_t_max);
         if let Some(t_max) = mb_t_max {
             split_by_ip(&mut graph, p, &t_max, &mut s, &mut edges, &mut heap);
         }
         for q in s {
             edges.insert((p, q));
         }
-
-        println!("Connects of p: {:?}", graph.connects_of(&p));
-
-        println!("----------------------------------------");
     }
     graph
 }
@@ -59,12 +52,10 @@ fn highest_ip(
     let mut top_ip = None;
     for q in s {
         for (v1, v2) in edges {
-            println!("\tIntersection of ({},{}) and ({},{}) is", p, q, v1, v2);
             let mut i = None;
             if q != v2 {
                 i = intersect_point((p.0, q.0), (v1.0, v2.0))
             }
-            println!("\t\t{:?}", i);
             if let Some(i) = i {
                 try_make_higher(&mut top_ip, i.into(), *q, (*v1, *v2));
             }
@@ -104,12 +95,10 @@ fn split_by_ip(
     edges: &mut HashSet<(ExtVec2, ExtVec2)>,
     h: &mut BinaryHeap<ExtVec2>,
 ) {
-    println!("\tSplitting by ip: {:?}", ip);
     edges.remove(&ip.edge);
     edges.remove(&(p, ip.q));
     s.remove(&ip.q);
     let is_new = graph.add_vertex(ip.pos);
-    println!("\t\tAdd new({}) vertex: {}", is_new, ip.pos);
     graph.remove_edge(&p, &ip.q);
     graph.remove_edge(&ip.edge.0, &ip.edge.1);
     graph.add_edge(&p, &ip.pos);
@@ -342,14 +331,6 @@ mod tests {
         let (verts, edges, expected_result) = square_graph_data();
         let g = Graph::from_data(verts.clone().into_iter(), edges.into_iter());
         let result = into_no_intersect(g);
-        for v in result.vertices() {
-            println!("Vertex: {}", v);
-            let connected = result.connects_of(v).unwrap();
-            for c in connected {
-                println!("\tConnected with: {}", c);
-            }
-        }
-
         assert_eq!(expected_result, result)
     }
 
@@ -358,14 +339,6 @@ mod tests {
         let (verts, edges, expected_result) = complex_graph_data();
         let g = Graph::from_data(verts.clone().into_iter(), edges.into_iter());
         let result = into_no_intersect(g);
-        for v in result.vertices() {
-            println!("Vertex: {}", v);
-            let connected = result.connects_of(v).unwrap();
-            for c in connected {
-                println!("\tConnected with: {}", c);
-            }
-        }
-
         assert_eq!(expected_result, result)
     }
 }
