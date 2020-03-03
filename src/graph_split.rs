@@ -1,4 +1,4 @@
-use crate::graph::Graph;
+use easy_graph::Graph;
 use crate::extended_vec2::ExtVec2;
 use std::collections::{BinaryHeap, HashSet};
 use std::iter::FromIterator;
@@ -15,7 +15,6 @@ pub fn into_no_intersect(mut graph: Graph<ExtVec2>) -> Graph<ExtVec2> {
     let mut heap = BinaryHeap::from_iter(graph.vertices().cloned());
     let mut edges = HashSet::with_capacity(graph.len());
     while let Some(p) = heap.pop() {
-        print_edges(&edges);
         let mut s = unchecked_connected(&graph, p, &mut edges);
         let mb_t_max = highest_ip(p, &s, &edges);
         if let Some(t_max) = mb_t_max {
@@ -98,7 +97,7 @@ fn split_by_ip(
     edges.remove(&ip.edge);
     edges.remove(&(p, ip.q));
     s.remove(&ip.q);
-    let is_new = graph.add_vertex(ip.pos);
+    graph.add_vertex(ip.pos);
     graph.remove_edge(&p, &ip.q);
     graph.remove_edge(&ip.edge.0, &ip.edge.1);
     graph.add_edge(&p, &ip.pos);
