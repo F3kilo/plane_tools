@@ -87,7 +87,7 @@ impl<T: Hash + Eq + Clone> Graph<T> {
     pub fn add_edge(&mut self, v1: &T, v2: &T) -> bool {
         if self.verts.contains_key(v1) && self.verts.contains_key(v2) {
             if v1 == v2 {
-                return false
+                return false;
             }
             self.verts.get_mut(v1).unwrap().insert(v2.clone());
             self.verts.get_mut(v2).unwrap().insert(v1.clone());
@@ -161,6 +161,10 @@ impl<T: Eq + Hash> PartialEq<Graph<T>> for Graph<T> {
 }
 
 impl<T: Eq + Hash> Eq for Graph<T> {}
+
+struct PlanarGraph(Graph<T>);
+
+impl PlanarGraph {}
 
 #[cfg(test)]
 mod tests {
