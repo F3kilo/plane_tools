@@ -4,13 +4,6 @@ use std::collections::{BinaryHeap, HashSet};
 use std::iter::FromIterator;
 use crate::intersect::intersect_point;
 
-fn print_edges(edges: &HashSet<(ExtVec2, ExtVec2)>) {
-    println!("\tEdges:");
-    for e in edges {
-        println!("\t\t{} <---> {}", e.0, e.1);
-    }
-}
-
 pub fn into_no_intersect(mut graph: Graph<ExtVec2>) -> Graph<ExtVec2> {
     let mut heap = BinaryHeap::from_iter(graph.vertices().cloned());
     let mut edges = HashSet::with_capacity(graph.len());
